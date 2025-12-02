@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto-C Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        .safe { border-color: #22c55e; }
+        .danger { border-color: #ef4444; }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Crypto-C Extension Test Page</h1>
+    
+    <div class="test-section safe">
+        <h2>✅ Safe Site Test</h2>
+        <p>This is a normal website. The extension should show a <strong>low risk score</strong> (0-30) when you open the popup.</p>
+        <p><strong>Test:</strong> Click the Crypto-C extension icon in your toolbar and check the risk score.</p>
+    </div>
+
+    <div class="test-section danger">
+        <h2>⚠️ Phishing Detection Test</h2>
+        <p>To test phishing detection, visit a URL with "malicious" in it:</p>
+        <ul>
+            <li><a href="http://example.com/malicious" target="_blank">http://example.com/malicious</a></li>
+            <li><a href="http://test-drainer-site.com" target="_blank">http://test-drainer-site.com</a></li>
+        </ul>
+        <p>The extension should show a <strong>high risk score</strong> and display a red warning overlay.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>🔗 Transaction Interception Test</h2>
+        <p>To test transaction interception, you need a Web3 site with MetaMask or another wallet.</p>
+        <p><strong>Note:</strong> This requires a dApp that triggers transactions. The extension will intercept <code>eth_sendTransaction</code> calls.</p>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 How to Check:</h2>
+        <ol>
+            <li><strong>Open Extension Popup:</strong> Click the extension icon in Chrome toolbar</li>
+            <li><strong>Check Risk Score:</strong> Should show current site's risk (0-100)</li>
+            <li><strong>Check Approvals:</strong> Should show mock approval data</li>
+            <li><strong>Open Console:</strong> Press F12 → Console tab to see logs</li>
+        </ol>
+    </div>
+</body>
+</html>
+

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto-C Security</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>Crypto-C</h1>
+                <span class="status-badge safe">Protected</span>
+            </div>
+            <button id="settings-btn" aria-label="Settings">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </button>
+        </header>
+
+        <main>
+            <!-- Current Site Status -->
+            <section class="card site-status">
+                <h2>Current Site</h2>
+                <div id="site-url" class="site-url">Scanning...</div>
+                <div id="risk-score-container" class="risk-meter">
+                    <div class="label">Risk Score</div>
+                    <div class="score low" id="risk-score">0/100</div>
+                    <div class="progress-bar">
+                        <div class="fill low" style="width: 0%"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Wallet Health / Approval Management -->
+            <section class="card approvals">
+                <div class="section-header">
+                    <h2>Approval Management</h2>
+                    <button id="refresh-approvals" class="icon-btn">↻</button>
+                </div>
+                <p class="description">Review and revoke high-risk token approvals.</p>
+                
+                <div id="approvals-list" class="approvals-list">
+                    <!-- Items will be injected here -->
+                    <div class="empty-state">No active approvals found.</div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <button id="revoke-all-btn" class="btn btn-danger" disabled>Revoke All Risky</button>
+        </footer>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
+

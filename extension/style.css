@@ -1,0 +1,250 @@
+:root {
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --success: #22c55e;
+    --warning: #eab308;
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    width: 360px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg);
+    color: var(--text-main);
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 500px;
+}
+
+header {
+    background-color: var(--surface);
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+}
+
+.logo h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-weight: 500;
+}
+
+.status-badge.safe {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+#settings-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+}
+
+#settings-btn:hover {
+    color: var(--text-main);
+}
+
+main {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.card h2 {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.site-url {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 12px;
+    word-break: break-all;
+}
+
+.risk-meter {
+    background: var(--bg);
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.risk-meter .label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.risk-meter .score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.score.low { color: var(--success); }
+.score.medium { color: var(--warning); }
+.score.high { color: var(--danger); }
+
+.progress-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progress-bar .fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.fill.low { background-color: var(--success); }
+.fill.medium { background-color: var(--warning); }
+.fill.high { background-color: var(--danger); }
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.25rem;
+    color: var(--text-muted);
+}
+
+.description {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.approvals-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.approval-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.approval-item:last-child {
+    border-bottom: none;
+}
+
+.token-info {
+    flex: 1;
+}
+
+.token-name {
+    font-weight: 500;
+    font-size: 0.875rem;
+}
+
+.spender {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.revoke-btn {
+    background-color: var(--surface);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.revoke-btn:hover {
+    background-color: var(--danger);
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+footer {
+    padding: 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: opacity 0.2s;
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
