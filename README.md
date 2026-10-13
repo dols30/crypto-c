@@ -22,7 +22,7 @@ The workspace checks URLs and reviews manually entered transaction calldata with
 2. Enable **Developer mode** and choose **Load unpacked**.
 3. Select this repository's `extension` directory.
 4. Reload any existing dApp tabs so the content scripts run.
-5. Open the extension popup to check the current page or inspect observed approvals.
+5. Click the pinned Crypto-C toolbar button to open its floating panel.
 
 The extension checks HTTP/HTTPS pages when they load. On supported, writable EIP-1193 providers, it reviews `eth_sendTransaction`, `eth_sign`, `personal_sign`, and typed-data signing requests before forwarding them to the wallet. It discovers late providers through EIP-6963, the initialization event and a bounded startup poll. Risky, unknown and unavailable analyses require an explicit decision; cancelled or timed-out requests are rejected with code 4001. The wallet still makes the final authorization decision.
 
@@ -56,10 +56,16 @@ Backend tests cover hostname bypasses, malformed input, approval decoding and ex
 
 ## API
 
-| Endpoint | Purpose |
-| --- | --- |
-| `GET /api/health` | Backend connectivity |
-| `POST /api/analyze-url` | Hostname heuristics for `{ "url": "https://example.com" }` |
-| `POST /api/simulate` | Compatibility endpoint for static transaction review; accepts `transaction`, `method`, `chain_id` |
+| Endpoint                | Purpose                                                                                           |
+| ----------------------- | ------------------------------------------------------------------------------------------------- |
+| `GET /api/health`       | Backend connectivity                                                                              |
+| `POST /api/analyze-url` | Hostname heuristics for `{ "url": "https://example.com" }`                                        |
+| `POST /api/simulate`    | Compatibility endpoint for static transaction review; accepts `transaction`, `method`, `chain_id` |
 
 The server binds to `127.0.0.1` and does not enable cross-origin API access. Inputs are not logged or sent to external services. The extension stores up to 50 observed permissions and 20 review summaries in local browser storage. The web workspace keeps review history only in memory.
+
+## Extension interface
+
+Crypto-C's toolbar button opens a rounded floating panel over the current webpage. The panel uses one Apple-inspired light appearance, native platform typography, and local Phosphor icons. Overview shows the current-site review; Permissions shows only observed approval submissions; Activity shows recent wallet reviews. Settings contains local diagnostics and the optional companion workspace. No theme switcher or colored status dots are used. Close it with the close button, Escape, a click outside, or a second toolbar click. Reload existing webpages after reloading the extension. Browser settings, protected pages, and pages that block the embedded panel cannot show this interface; the toolbar tooltip explains when a normal webpage must be opened or reloaded.
+
+The interface runs in an extension-origin iframe inside a closed shadow root. Wallet operations require a short-lived, toolbar-created session tied to its original tab and frame. An arbitrary website embedding the public panel HTML cannot read stored state or initiate a revocation. This panel is still a best-effort UI on a webpage, not a security boundary against a hostile page removing or covering it.

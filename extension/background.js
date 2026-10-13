@@ -6,6 +6,52 @@ import {
   HASH,
 } from "./client.js";
 
+// A panel gets a short-lived capability only after a toolbar click.
+const panels = new Map();
+function panelTab(message, sender) {
+  const session = panels.get(sender.tab?.id);
+  const url = new URL(sender.url || "https://invalid.example");
+  if (
+    sender.id !== chrome.runtime.id ||
+    url.protocol !== "chrome-extension:" ||
+    url.pathname !== "/popup.html" ||
+    !session ||
+    url.searchParams.get("panel") !== session.token ||
+    message.panelToken !== session.token
+  )
+    throw new Error("Use the extension popup or reopen its toolbar panel.");
+  if (session.frameId !== undefined && session.frameId !== sender.frameId)
+    throw new Error("Reopen the Crypto-C toolbar panel.");
+  session.frameId = sender.frameId;
+  return sender.tab;
+}
+chrome.action.onClicked.addListener(async (tab) => {
+  if (!tab.id) return;
+  const session = { token: crypto.randomUUID() };
+  panels.set(tab.id, session);
+  try {
+    const result = await chrome.tabs.sendMessage(
+      tab.id,
+      {
+        type: "TOGGLE_PANEL",
+        url: chrome.runtime.getURL(`popup.html?panel=${session.token}`),
+      },
+      { frameId: 0 },
+    );
+    if (!result?.opened) panels.delete(tab.id);
+    await chrome.action.setBadgeText({ tabId: tab.id, text: "" });
+    await chrome.action.setTitle({ tabId: tab.id, title: "Crypto-C Security" });
+  } catch (_) {
+    panels.delete(tab.id);
+    await chrome.action.setBadgeText({ tabId: tab.id, text: "!" });
+    await chrome.action.setTitle({
+      tabId: tab.id,
+      title: "Open a normal webpage and reload it, then click Crypto-C.",
+    });
+  }
+});
+chrome.tabs.onRemoved.addListener((tabId) => panels.delete(tabId));
+
 let writes = Promise.resolve();
 function writeState(update) {
   const result = writes.then(async () => {
@@ -20,6 +66,30 @@ function writeState(update) {
 }
 
 async function handle(message, sender) {
+  const isPanel = sender.url?.startsWith("chrome-extension:") && sender.tab;
+  const ownedTab = isPanel ? panelTab(message, sender) : null;
+  if (message.type === "PANEL_CONTEXT") {
+    if (!ownedTab) throw new Error("Open the Crypto-C toolbar panel.");
+    return { url: ownedTab.url };
+  }
+  if (message.type === "CLOSE_PANEL") {
+    if (!ownedTab) throw new Error("Open the Crypto-C toolbar panel.");
+    panels.delete(ownedTab.id);
+    await chrome.tabs.sendMessage(
+      ownedTab.id,
+      { type: "CLOSE_PANEL" },
+      { frameId: 0 },
+    );
+    return null;
+  }
+  if (
+    message.type === "PANEL_DISMISSED" &&
+    sender.tab &&
+    sender.frameId === 0
+  ) {
+    panels.delete(sender.tab.id);
+    return null;
+  }
   if (message.type === "ANALYZE_URL")
     return requestAPI("/api/analyze-url", { url: message.url });
   if (message.type === "REVIEW_REQUEST") {
@@ -80,12 +150,16 @@ async function handle(message, sender) {
   }
   if (message.type === "SYNC_APPROVALS" || message.type === "REVOKE_APPROVAL") {
     // Only extension pages can initiate wallet operations; page bridges cannot.
-    if (sender.tab || sender.id !== chrome.runtime.id)
+    if ((sender.tab && !ownedTab) || sender.id !== chrome.runtime.id)
       throw new Error("Use the extension popup.");
-    const [tab] = await chrome.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
+    const tab =
+      ownedTab ||
+      (
+        await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        })
+      )[0];
     if (!tab?.id)
       throw new Error("Open the dApp tab with your connected wallet.");
     const state = await chrome.storage.local.get({ approvals: [] });

@@ -33,3 +33,6 @@ ENV/
 *.crx
 *.zip
 
+
+# Development dependencies
+node_modules/

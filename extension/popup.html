@@ -6,63 +6,247 @@
     <title>Crypto-C Security</title>
     <link rel="stylesheet" href="style.css" />
   </head>
-  <body>
-    <header>
-      <div class="brand">
-        <span class="brand-mark">C</span>
-        <h1>Crypto-C</h1>
-      </div>
-      <span id="status" class="status">Checking…</span>
-    </header>
-    <main>
-      <section class="card">
-        <div class="section-heading">
-          <h2>Current website</h2>
-          <button id="rescan" class="text-button" type="button">Rescan</button>
+  <body data-risk="unknown">
+    <div class="app-shell">
+      <header class="app-header">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">C</span>
+          <div>
+            <h1>Crypto-C</h1>
+            <p>Web3 security</p>
+          </div>
         </div>
-        <div id="site-url" class="site-url">Getting active tab…</div>
-        <div class="score-row">
-          <span id="risk-score" class="score">—</span
-          ><span id="risk-label">Not reviewed</span>
-        </div>
-        <p id="site-details" class="description" role="status">
-          Connecting to your local backend.
-        </p>
-      </section>
-      <section class="card">
-        <div class="section-heading">
-          <h2>Observed approvals</h2>
-          <button id="refresh-approvals" class="text-button" type="button">
-            Refresh
+        <div class="header-actions">
+          <button
+            id="close-panel"
+            class="icon-button"
+            aria-label="Close Crypto-C"
+            title="Close"
+            hidden
+          >
+            <span class="icon" data-icon="x"></span>
+          </button>
+          <button
+            id="settings-toggle"
+            class="icon-button"
+            aria-label="Open settings"
+            aria-controls="settings-view"
+            aria-expanded="false"
+            title="Settings"
+          >
+            <span class="icon" data-icon="gear-six"></span>
           </button>
         </div>
-        <p class="description">
-          Only approvals submitted while Crypto-C was active. Refresh on the
-          connected dApp to check the chain.
-        </p>
-        <div id="approvals-list" class="approvals-list"></div>
-        <p id="approval-message" class="description" role="status"></p>
-      </section>
-      <section class="card">
-        <h2>Latest wallet review</h2>
-        <div id="latest-review" class="description">
-          No wallet requests reviewed yet.
-        </div>
-      </section>
-    </main>
-    <footer>
-      <a
-        href="http://127.0.0.1:8000"
-        target="_blank"
-        rel="noopener"
-        class="workspace-link"
-        >Open security workspace ↗</a
+      </header>
+      <div id="main-view" class="main-view">
+        <section class="site-context" aria-label="Current website">
+          <span class="site-symbol"
+            ><span class="icon" data-icon="globe"></span
+          ></span>
+          <div class="site-identity">
+            <span class="context-label">Current website</span
+            ><span id="site-url" title="">Getting active tab…</span>
+          </div>
+          <button
+            id="rescan"
+            class="icon-button rescan"
+            aria-label="Rescan current website"
+            title="Rescan"
+          >
+            <span class="icon" data-icon="arrow-clockwise"></span>
+          </button>
+        </section>
+        <section
+          class="risk-hero"
+          aria-labelledby="risk-title"
+          aria-busy="true"
+        >
+          <div class="hero-copy">
+            <div class="risk-kicker">
+              <span id="risk-label">Checking website</span>
+            </div>
+            <h2 id="risk-title">Reviewing<br />this website.</h2>
+            <div class="risk-reading">
+              <span id="risk-score">…</span
+              ><span class="score-scale">/100<span>risk score</span></span>
+            </div>
+          </div>
+          <div class="hero-symbol" aria-hidden="true">
+            <span id="risk-symbol" class="icon" data-icon="shield-check"></span>
+          </div>
+          <p id="site-details" class="hero-details" role="status">
+            Your local engine is reviewing the hostname.
+          </p>
+        </section>
+        <nav class="view-tabs" role="tablist" aria-label="Security views">
+          <button
+            id="overview-tab"
+            role="tab"
+            aria-selected="true"
+            aria-controls="overview-panel"
+            tabindex="0"
+            data-tab="overview"
+          >
+            Overview</button
+          ><button
+            id="permissions-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="permissions-panel"
+            tabindex="-1"
+            data-tab="permissions"
+          >
+            Permissions
+            <span id="permission-count" class="tab-count">0</span></button
+          ><button
+            id="activity-tab"
+            role="tab"
+            aria-selected="false"
+            aria-controls="activity-panel"
+            tabindex="-1"
+            data-tab="activity"
+          >
+            Activity <span id="activity-count" class="tab-count">0</span>
+          </button>
+        </nav>
+        <main class="panels">
+          <section
+            id="overview-panel"
+            class="view-panel"
+            role="tabpanel"
+            tabindex="0"
+            aria-labelledby="overview-tab"
+          >
+            <div class="section-heading">
+              <h3>Wallet requests</h3>
+            </div>
+            <div id="latest-review" class="review-preview">
+              <span class="empty-symbol"
+                ><span class="icon" data-icon="signature"></span
+              ></span>
+              <div>
+                <h4>No wallet requests yet.</h4>
+                <p>A supported wallet request will appear here for review.</p>
+              </div>
+            </div>
+            <button id="view-activity" class="row-link" type="button">
+              <span class="icon" data-icon="clock-counter-clockwise"></span
+              ><span>Review history</span
+              ><span class="icon arrow" data-icon="caret-right"></span>
+            </button>
+            <p class="scope-note">
+              <span class="icon" data-icon="lock-key"></span
+              ><span>Local checks. No seed phrase or private key needed.</span>
+            </p>
+          </section>
+          <section
+            id="permissions-panel"
+            class="view-panel"
+            role="tabpanel"
+            tabindex="0"
+            aria-labelledby="permissions-tab"
+            hidden
+          >
+            <div class="section-heading">
+              <h3>Observed permissions</h3>
+              <button id="refresh-approvals" class="text-button" type="button">
+                <span class="icon" data-icon="arrow-clockwise"></span>Refresh
+              </button>
+            </div>
+            <p class="panel-intro">
+              Permissions submitted while Crypto-C was active. Refresh on the
+              connected dApp to check the chain.
+            </p>
+            <div id="approvals-list"></div>
+            <p id="approval-message" class="panel-message" role="status"></p>
+          </section>
+          <section
+            id="activity-panel"
+            class="view-panel"
+            role="tabpanel"
+            tabindex="0"
+            aria-labelledby="activity-tab"
+            hidden
+          >
+            <div class="section-heading">
+              <h3>Wallet review history</h3>
+              <span class="subtle-label">Last 20</span>
+            </div>
+            <div id="review-history"></div>
+          </section>
+        </main>
+      </div>
+      <section
+        id="settings-view"
+        class="settings-view"
+        hidden
+        aria-labelledby="settings-heading"
       >
-      <p>
-        Heuristic checks cannot guarantee safety. Revocations require wallet
-        confirmation and gas.
-      </p>
-    </footer>
+        <div class="settings-heading">
+          <button
+            id="settings-back"
+            class="icon-button"
+            aria-label="Back to overview"
+          >
+            <span class="icon" data-icon="arrow-left"></span>
+          </button>
+          <h2 id="settings-heading">Your security setup</h2>
+        </div>
+        <div class="settings-block">
+          <span class="icon" data-icon="lock-key"></span>
+          <div>
+            <h3>Local by design</h3>
+            <p>
+              Checks run through your backend at 127.0.0.1:8000. Review
+              summaries stay in local browser storage.
+            </p>
+          </div>
+        </div>
+        <div class="settings-block">
+          <span class="icon" data-icon="shield-check"></span>
+          <div>
+            <h3>Know the limits</h3>
+            <p>
+              Hostname and calldata checks only. No blocklist feed, contract
+              simulation or safety guarantee. Your wallet is the final
+              confirmation step.
+            </p>
+          </div>
+        </div>
+        <div class="settings-block">
+          <span class="icon" data-icon="key"></span>
+          <div>
+            <h3>Revoking permissions</h3>
+            <p>
+              Refresh with the original wallet account and chain. Revocations
+              require wallet confirmation and network gas.
+            </p>
+          </div>
+        </div>
+        <a
+          class="settings-link"
+          href="http://127.0.0.1:8000"
+          target="_blank"
+          rel="noopener"
+          >Open diagnostic workspace<span
+            class="icon"
+            data-icon="arrow-up-right"
+          ></span></a
+        ><a
+          class="settings-link"
+          href="https://github.com/dols30/crypto-c"
+          target="_blank"
+          rel="noopener"
+          >View source code<span class="icon" data-icon="arrow-up-right"></span
+        ></a>
+      </section>
+      <footer class="app-footer">
+        <div id="engine-status" class="engine-status">
+          <span id="status">Connecting to local engine</span>
+        </div>
+        <span class="footer-note">On this device</span>
+      </footer>
+    </div>
     <script type="module" src="popup.js"></script>
   </body>
 </html>
