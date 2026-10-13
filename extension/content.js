@@ -1,5 +1,47 @@
 (() => {
   const pending = new Map();
+  let panelHost;
+  let previousFocus;
+  const closePanel = () => {
+    panelHost?.remove();
+    panelHost = undefined;
+    document.removeEventListener("pointerdown", outsidePanel, true);
+    document.removeEventListener("keydown", panelEscape, true);
+    if (previousFocus?.isConnected) previousFocus.focus();
+  };
+  function outsidePanel(event) {
+    if (panelHost && !event.composedPath().includes(panelHost)) {
+      closePanel();
+      chrome.runtime.sendMessage({ type: "PANEL_DISMISSED" }).catch(() => {});
+    }
+  }
+  function panelEscape(event) {
+    if (event.key === "Escape") {
+      closePanel();
+      chrome.runtime.sendMessage({ type: "PANEL_DISMISSED" }).catch(() => {});
+    }
+  }
+  function togglePanel(url) {
+    if (panelHost) {
+      closePanel();
+      return;
+    }
+    previousFocus = document.activeElement;
+    panelHost = document.createElement("div");
+    panelHost.style.cssText =
+      "all:initial;position:fixed;top:16px;right:16px;width:min(480px,max(380px,28vw),calc(100vw - 24px));height:min(740px,calc(100dvh - 32px));z-index:2147483646;border-radius:20px;box-shadow:0 16px 56px #0004,0 2px 8px #0002;overflow:hidden;display:block;";
+    const root = panelHost.attachShadow({ mode: "closed" });
+    const frame = document.createElement("iframe");
+    frame.src = url;
+    frame.title = "Crypto-C security panel";
+    frame.style.cssText =
+      "display:block;width:100%;height:100%;border:0;border-radius:20px;background:transparent;";
+    frame.onload = () => frame.focus();
+    root.append(frame);
+    document.documentElement.append(panelHost);
+    document.addEventListener("pointerdown", outsidePanel, true);
+    document.addEventListener("keydown", panelEscape, true);
+  }
   const send = async (message) => {
     const result = await chrome.runtime.sendMessage(message);
     if (!result?.ok)
@@ -114,6 +156,16 @@
   });
 
   chrome.runtime.onMessage.addListener((message, _sender, respond) => {
+    if (message.type === "TOGGLE_PANEL") {
+      togglePanel(message.url);
+      respond({ opened: Boolean(panelHost) });
+      return;
+    }
+    if (message.type === "CLOSE_PANEL") {
+      closePanel();
+      respond({ closed: true });
+      return;
+    }
     if (!["REVOKE_APPROVAL", "CHECK_APPROVALS"].includes(message.type)) return;
     const id = crypto.randomUUID();
     new Promise((resolve) => {
