@@ -12,12 +12,12 @@ These are design references, not integrations. Crypto-C does not inherit their t
 
 ## Direction
 
-Design read: a compact security extension for Web3 users, with Apple-inspired light surfaces and the existing Crypto-C wordmark and blue identity preserved. `DESIGN_VARIANCE=4`, `MOTION_INTENSITY=2`, `VISUAL_DENSITY=5`.
+Design read: a compact security extension for Web3 users, with Apple-inspired graphite surfaces and the existing Crypto-C wordmark and blue identity preserved. `DESIGN_VARIANCE=4`, `MOTION_INTENSITY=2`, `VISUAL_DENSITY=5`.
 
-- 400 × 580 floating panel with a 20px rounded outer silhouette, constrained to the viewport. A closed shadow root isolates the host styles; an extension-origin iframe contains the interface. Tabs and scrollable panels keep controls accessible on shorter viewports.
+- A floating panel up to 480 × 740, with a 20px rounded outer silhouette, constrained to the viewport. Width, relative spacing and typography scale together; narrow or short screens use internal scrolling. A closed shadow root isolates the host styles; an extension-origin iframe contains the interface. Tabs and scrollable panels keep controls accessible on shorter viewports.
 - A current-site context row and prominent risk summary. Neutral text for low indicators; amber and red are reserved for warnings.
 - Overview, Permissions and Activity tabs, with keyboard navigation and real stored counts.
-- One light appearance, per the user's request. No theme picker or colored status dots.
+- One graphite appearance, per the user's revised request. No theme picker or colored status dots.
 - Native platform UI typography and vendored Phosphor icons. No CDN requests from the popup.
 - Empty, loading, unavailable, pending, confirmed and revoked states remain distinct. No invented permissions, balances or safety guarantees.
 - Motion supports state feedback only and respects reduced-motion preferences.

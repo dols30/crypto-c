@@ -26,7 +26,11 @@ const sender = {
   origin: "https://dapp.example",
 };
 let instance = 0;
-async function start({ failAPI = false, initial = {} } = {}) {
+async function start({
+  failAPI = false,
+  initial = {},
+  sessionStore = {},
+} = {}) {
   let listener;
   let click;
   let sent = [];
@@ -54,6 +58,14 @@ async function start({ failAPI = false, initial = {} } = {}) {
       },
     },
     storage: {
+      session: {
+        async get(defaults) {
+          return { ...defaults, ...structuredClone(sessionStore) };
+        },
+        async set(update) {
+          Object.assign(sessionStore, structuredClone(update));
+        },
+      },
       local: {
         async get(defaults) {
           return { ...defaults, ...structuredClone(rows) };
@@ -192,6 +204,33 @@ test("an arbitrary embedded extension page cannot read state or request wallet a
   );
   assert.equal(
     (await h.send({ type: "GET_STATE" }, { ...frame, tab: { id: 12 } })).ok,
+    false,
+  );
+});
+
+test("an open panel remains authorized after the service worker restarts", async () => {
+  const sessionStore = {};
+  const first = await start({ sessionStore });
+  await first.click({ id: 12 });
+  const url = first.sent[0].message.url;
+  const panelToken = new URL(url).searchParams.get("panel");
+  const frame = { id: "crypto-c", tab: { id: 12 }, frameId: 3, url };
+  assert.equal(
+    (await first.send({ type: "GET_STATE", panelToken }, frame)).ok,
+    true,
+  );
+  const restarted = await start({ sessionStore });
+  assert.equal(
+    (await restarted.send({ type: "GET_STATE", panelToken }, frame)).ok,
+    true,
+  );
+  assert.equal(
+    (
+      await restarted.send(
+        { type: "GET_STATE", panelToken },
+        { ...frame, frameId: 4 },
+      )
+    ).ok,
     false,
   );
 });

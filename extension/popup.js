@@ -114,10 +114,10 @@ function setRisk(score, summary) {
 async function checkEngine() {
   try {
     await requestAPI("/api/health");
-    $("status").textContent = "Local checks available";
+    $("status").textContent = "Local engine connected";
     $("engine-status").className = "engine-status online";
   } catch (_) {
-    $("status").textContent = "Local checks unavailable";
+    $("status").textContent = "Local engine offline";
     $("engine-status").className = "engine-status offline";
   }
 }
@@ -140,7 +140,12 @@ async function scan() {
     const score = Number(report.risk_score);
     if (!Number.isFinite(score) || score < 0 || score > 100)
       throw new Error("The local engine returned an invalid score.");
-    setRisk(score, report.details);
+    setRisk(
+      score,
+      score < 30
+        ? "Hostname checks only. Not a safety guarantee."
+        : report.details,
+    );
   } catch (error) {
     setRisk(null, error.message);
   } finally {
@@ -185,7 +190,7 @@ function renderReviews() {
     const copy = text("div");
     copy.append(
       text("h4", "No wallet requests yet."),
-      text("p", "A supported wallet request will appear here for review."),
+      text("p", "Connect on a dApp to review requests."),
     );
     preview.append(symbol, copy);
   }

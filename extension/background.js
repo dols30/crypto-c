@@ -8,6 +8,20 @@ import {
 
 // A panel gets a short-lived capability only after a toolbar click.
 const panels = new Map();
+const panelsReady = chrome.storage.session
+  .get({ panelSessions: {} })
+  .then(({ panelSessions }) => {
+    for (const [tabId, session] of Object.entries(panelSessions))
+      panels.set(Number(tabId), session);
+  });
+let panelWrites = Promise.resolve();
+function savePanels() {
+  const snapshot = Object.fromEntries(panels);
+  panelWrites = panelWrites
+    .catch(() => {})
+    .then(() => chrome.storage.session.set({ panelSessions: snapshot }));
+  return panelWrites;
+}
 function panelTab(message, sender) {
   const session = panels.get(sender.tab?.id);
   const url = new URL(sender.url || "https://invalid.example");
@@ -26,9 +40,11 @@ function panelTab(message, sender) {
   return sender.tab;
 }
 chrome.action.onClicked.addListener(async (tab) => {
+  await panelsReady;
   if (!tab.id) return;
   const session = { token: crypto.randomUUID() };
   panels.set(tab.id, session);
+  await savePanels();
   try {
     const result = await chrome.tabs.sendMessage(
       tab.id,
@@ -38,11 +54,15 @@ chrome.action.onClicked.addListener(async (tab) => {
       },
       { frameId: 0 },
     );
-    if (!result?.opened) panels.delete(tab.id);
+    if (!result?.opened) {
+      panels.delete(tab.id);
+      await savePanels();
+    }
     await chrome.action.setBadgeText({ tabId: tab.id, text: "" });
     await chrome.action.setTitle({ tabId: tab.id, title: "Crypto-C Security" });
   } catch (_) {
     panels.delete(tab.id);
+    await savePanels();
     await chrome.action.setBadgeText({ tabId: tab.id, text: "!" });
     await chrome.action.setTitle({
       tabId: tab.id,
@@ -50,7 +70,11 @@ chrome.action.onClicked.addListener(async (tab) => {
     });
   }
 });
-chrome.tabs.onRemoved.addListener((tabId) => panels.delete(tabId));
+chrome.tabs.onRemoved.addListener(async (tabId) => {
+  await panelsReady;
+  panels.delete(tabId);
+  await savePanels();
+});
 
 let writes = Promise.resolve();
 function writeState(update) {
@@ -66,8 +90,10 @@ function writeState(update) {
 }
 
 async function handle(message, sender) {
+  await panelsReady;
   const isPanel = sender.url?.startsWith("chrome-extension:") && sender.tab;
   const ownedTab = isPanel ? panelTab(message, sender) : null;
+  if (ownedTab) await savePanels();
   if (message.type === "PANEL_CONTEXT") {
     if (!ownedTab) throw new Error("Open the Crypto-C toolbar panel.");
     return { url: ownedTab.url };
@@ -75,6 +101,7 @@ async function handle(message, sender) {
   if (message.type === "CLOSE_PANEL") {
     if (!ownedTab) throw new Error("Open the Crypto-C toolbar panel.");
     panels.delete(ownedTab.id);
+    await savePanels();
     await chrome.tabs.sendMessage(
       ownedTab.id,
       { type: "CLOSE_PANEL" },
@@ -88,6 +115,7 @@ async function handle(message, sender) {
     sender.frameId === 0
   ) {
     panels.delete(sender.tab.id);
+    await savePanels();
     return null;
   }
   if (message.type === "ANALYZE_URL")

@@ -44,8 +44,7 @@
             ><span class="icon" data-icon="globe"></span
           ></span>
           <div class="site-identity">
-            <span class="context-label">Current website</span
-            ><span id="site-url" title="">Getting active tab…</span>
+            <span id="site-url" title="">Getting active tab…</span>
           </div>
           <button
             id="rescan"
@@ -75,7 +74,7 @@
             <span id="risk-symbol" class="icon" data-icon="shield-check"></span>
           </div>
           <p id="site-details" class="hero-details" role="status">
-            Your local engine is reviewing the hostname.
+            Checking hostname…
           </p>
         </section>
         <nav class="view-tabs" role="tablist" aria-label="Security views">
@@ -126,7 +125,7 @@
               ></span>
               <div>
                 <h4>No wallet requests yet.</h4>
-                <p>A supported wallet request will appear here for review.</p>
+                <p>Connect on a dApp to review requests.</p>
               </div>
             </div>
             <button id="view-activity" class="row-link" type="button">
@@ -134,10 +133,6 @@
               ><span>Review history</span
               ><span class="icon arrow" data-icon="caret-right"></span>
             </button>
-            <p class="scope-note">
-              <span class="icon" data-icon="lock-key"></span
-              ><span>Local checks. No seed phrase or private key needed.</span>
-            </p>
           </section>
           <section
             id="permissions-panel"
@@ -154,8 +149,7 @@
               </button>
             </div>
             <p class="panel-intro">
-              Permissions submitted while Crypto-C was active. Refresh on the
-              connected dApp to check the chain.
+              Submitted while Crypto-C was active. Refresh to check status.
             </p>
             <div id="approvals-list"></div>
             <p id="approval-message" class="panel-message" role="status"></p>
@@ -244,7 +238,6 @@
         <div id="engine-status" class="engine-status">
           <span id="status">Connecting to local engine</span>
         </div>
-        <span class="footer-note">On this device</span>
       </footer>
     </div>
     <script type="module" src="popup.js"></script>

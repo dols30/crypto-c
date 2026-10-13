@@ -29,7 +29,7 @@
     previousFocus = document.activeElement;
     panelHost = document.createElement("div");
     panelHost.style.cssText =
-      "all:initial;position:fixed;top:20px;right:20px;width:min(400px,calc(100vw - 32px));height:min(580px,calc(100dvh - 40px));z-index:2147483646;border-radius:20px;box-shadow:0 16px 56px #0004,0 2px 8px #0002;overflow:hidden;display:block;";
+      "all:initial;position:fixed;top:16px;right:16px;width:min(480px,max(380px,28vw),calc(100vw - 24px));height:min(740px,calc(100dvh - 32px));z-index:2147483646;border-radius:20px;box-shadow:0 16px 56px #0004,0 2px 8px #0002;overflow:hidden;display:block;";
     const root = panelHost.attachShadow({ mode: "closed" });
     const frame = document.createElement("iframe");
     frame.src = url;
