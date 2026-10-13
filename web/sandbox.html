@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crypto-C | Wallet sandbox</title>
+    <link rel="stylesheet" href="/app/workspace.css" />
+  </head>
+  <body style="max-width: 750px; margin: auto; padding: 35px">
+    <a href="/">← Security workspace</a>
+    <h1 style="margin-top: 30px">Wallet review sandbox</h1>
+    <p>
+      This test wallet never connects to a blockchain or spends funds. It uses
+      the extension's provider hook and isolated review dialog with the local
+      API.
+    </p>
+    <section class="panel">
+      <h2>Test a request</h2>
+      <p class="panel-description">
+        Cancel a request to check that it never reaches the test wallet, or
+        continue to see the test response. Use concurrent requests to verify
+        that decisions stay separate.
+      </p>
+      <button class="primary" id="nft-request" type="button">
+        Request NFT access
+      </button>
+      <button class="primary" id="sign-request" type="button">
+        Request signature
+      </button>
+      <p class="description" id="wallet-count">
+        Requests forwarded to test wallet: 0
+      </p>
+      <pre
+        id="sandbox-result"
+        style="white-space: pre-wrap; word-break: break-word"
+        aria-live="polite"
+      >
+No requests yet.</pre
+      >
+    </section>
+    <script src="/app/sandbox.js"></script>
+    <script src="/extension/content.js"></script>
+    <script src="/extension/injected.js"></script>
+  </body>
+</html>
