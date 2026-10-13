@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crypto-C | Security workspace</title>
+    <link rel="stylesheet" href="/app/workspace.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <a class="brand" href="/" aria-label="Crypto-C home"
+        ><span class="brand-mark">C</span><span>Crypto-C</span></a
+      >
+      <div class="sidebar-caption">WEB3 SECURITY</div>
+      <nav aria-label="Workspace">
+        <a class="nav-item selected" href="#workspace">Security workspace</a
+        ><a class="nav-item" href="#activity">Review history</a
+        ><a class="nav-item" href="/docs" target="_blank" rel="noopener"
+          >API reference <span>↗</span></a
+        >
+      </nav>
+      <div class="sidebar-note">
+        <div class="local-mark">LOCAL BY DESIGN</div>
+        <p>
+          Your inputs stay with your local backend. No wallet connection needed.
+        </p>
+        <a
+          href="https://github.com/dols30/crypto-c"
+          target="_blank"
+          rel="noopener"
+          >View source ↗</a
+        >
+      </div>
+    </aside>
+    <div class="workspace" id="workspace">
+      <header class="topbar">
+        <span>Security workspace</span
+        ><span class="connection" id="connection" role="status"
+          >Connecting to backend…</span
+        >
+      </header>
+      <main>
+        <div class="page-heading">
+          <div>
+            <h1>Know what you're approving.</h1>
+            <p>
+              Check a destination. Review a wallet permission. Stay in control.
+            </p>
+          </div>
+          <span class="workspace-label">LOCAL WORKSPACE</span>
+        </div>
+        <div class="review-grid">
+          <section class="panel url-panel" aria-labelledby="url-heading">
+            <div class="panel-heading">
+              <div>
+                <span class="panel-number">01</span>
+                <h2 id="url-heading">Website check</h2>
+              </div>
+              <span class="method">URL heuristics</span>
+            </div>
+            <p class="panel-description">
+              Inspect the hostname before you connect your wallet.
+            </p>
+            <form id="url-form">
+              <label for="url-input">Website URL</label>
+              <div class="url-input-row">
+                <input
+                  id="url-input"
+                  name="url"
+                  type="url"
+                  value="https://opensea.io"
+                  placeholder="https://example.com"
+                  required
+                /><button class="primary" type="submit">Check URL</button>
+              </div>
+            </form>
+            <div class="examples">
+              Try an example:
+              <button id="trusted-example" type="button">OpenSea</button
+              ><button id="suspicious-example" type="button">
+                Lookalike domain
+              </button>
+            </div>
+            <div id="url-result" class="result-placeholder" aria-live="polite">
+              <span class="placeholder-mark">↗</span>
+              <h3>A clearer view of the destination.</h3>
+              <p>
+                Run a check to see hostname indicators and a risk explanation.
+              </p>
+            </div>
+            <div class="panel-footnote">
+              A low score means no listed indicators were found. It is not a
+              safety guarantee.
+            </div>
+          </section>
+          <section class="panel transaction-panel" aria-labelledby="tx-heading">
+            <div class="panel-heading">
+              <div>
+                <span class="panel-number">02</span>
+                <h2 id="tx-heading">Transaction review</h2>
+              </div>
+              <span class="method">Calldata review</span>
+            </div>
+            <p class="panel-description">
+              Decode the permission a contract call is requesting.
+            </p>
+            <div class="preset-tabs" aria-label="Example transaction">
+              <button
+                type="button"
+                class="active"
+                data-preset="unlimited"
+                aria-pressed="true"
+              >
+                Unlimited allowance</button
+              ><button
+                type="button"
+                data-preset="collection"
+                aria-pressed="false"
+              >
+                NFT access</button
+              ><button
+                type="button"
+                data-preset="transfer"
+                aria-pressed="false"
+              >
+                Transfer
+              </button>
+            </div>
+            <form id="tx-form">
+              <div class="tx-fields">
+                <div>
+                  <label for="recipient">Contract / recipient</label
+                  ><input id="recipient" required spellcheck="false" />
+                </div>
+                <div>
+                  <label for="chain">Chain ID</label
+                  ><input id="chain" type="number" min="1" value="1" required />
+                </div>
+              </div>
+              <details>
+                <summary>Edit calldata and value</summary>
+                <label for="calldata">Calldata</label
+                ><textarea id="calldata" rows="3" spellcheck="false"></textarea
+                ><label for="value">Native value (wei, decimal or hex)</label
+                ><input id="value" value="0x0" spellcheck="false" />
+              </details>
+              <button class="primary review-button" type="submit">
+                Review transaction
+              </button>
+            </form>
+            <div id="tx-result" class="tx-placeholder" aria-live="polite">
+              <h3>Understand the permission, first.</h3>
+              <p>
+                Use an example or enter your own calldata. Nothing is signed or
+                sent.
+              </p>
+            </div>
+            <div class="panel-footnote">
+              Static inspection only. No EVM simulation, balances, reputation
+              lookup or gas estimate.
+            </div>
+          </section>
+        </div>
+        <section class="activity" id="activity">
+          <div class="activity-heading">
+            <h2>Recent reviews</h2>
+            <button id="clear-history" type="button">Clear history</button>
+          </div>
+          <div id="history-list">
+            <p class="history-empty">
+              Your checks will appear here during this session.
+            </p>
+          </div>
+        </section>
+        <footer class="workspace-footer">
+          <span>Review before you connect.</span
+          ><span>Crypto-C · Local security tools</span>
+        </footer>
+      </main>
+    </div>
+    <script type="module" src="/app/workspace.js"></script>
+  </body>
+</html>

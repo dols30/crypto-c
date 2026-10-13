@@ -1,112 +1,147 @@
-chrome.webNavigation.onCommitted.addListener((details) => {
-    if (details.frameId === 0) {
-        analyzeUrl(details.url, details.tabId);
-    }
-});
+import {
+  requestAPI,
+  normalizeRequest,
+  approvalKey,
+  ADDRESS,
+  HASH,
+} from "./client.js";
 
-async function analyzeUrl(url, tabId) {
-    try {
-        console.log(`Analyzing URL: ${url}`);
-        
-        try {
-            const response = await fetch('http://localhost:8000/api/analyze-url', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ url })
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.is_phishing || result.risk_score > 85) {
-                    chrome.scripting.executeScript({
-                        target: { tabId: tabId },
-                        func: showWarningOverlay
-                    });
-                }
-                return;
+let writes = Promise.resolve();
+function writeState(update) {
+  const result = writes.then(async () => {
+    const state = await chrome.storage.local.get({
+      approvals: [],
+      reviews: [],
+    });
+    await chrome.storage.local.set(await update(state));
+  });
+  writes = result.catch(() => {});
+  return result;
+}
+
+async function handle(message, sender) {
+  if (message.type === "ANALYZE_URL")
+    return requestAPI("/api/analyze-url", { url: message.url });
+  if (message.type === "REVIEW_REQUEST") {
+    const payload = normalizeRequest(message.payload);
+    const report = await requestAPI("/api/simulate", payload);
+    await writeState((state) => ({
+      reviews: [
+        {
+          ...report,
+          origin: sender.origin || sender.url || "",
+          reviewed_at: new Date().toISOString(),
+        },
+        ...state.reviews,
+      ].slice(0, 20),
+    }));
+    return report;
+  }
+  if (message.type === "APPROVAL_SUBMITTED" && sender.tab) {
+    const payload = normalizeRequest(message.payload);
+    if (
+      payload.method !== "eth_sendTransaction" ||
+      !HASH.test(message.hash || "")
+    )
+      return null;
+    // Derive the approval from the submitted request, never from page-supplied report fields.
+    const report = await requestAPI("/api/simulate", payload);
+    const approval = report.approval;
+    if (!approval || !ADDRESS.test(approval.owner)) return null;
+    await writeState((state) => {
+      const rows = state.approvals.filter(
+        (row) => approvalKey(row) !== approvalKey(approval),
+      );
+      const previous = state.approvals.find(
+        (row) => approvalKey(row) === approvalKey(approval),
+      );
+      return {
+        approvals: [
+          {
+            ...previous,
+            ...approval,
+            hash: message.hash,
+            state: approval.is_revocation
+              ? "revocation submitted"
+              : "submitted",
+            risk_score: report.risk_score,
+            origin: sender.origin || "",
+            updated_at: new Date().toISOString(),
+          },
+          ...rows,
+        ].slice(0, 50),
+      };
+    });
+    return { saved: true };
+  }
+  if (message.type === "GET_STATE") {
+    await writes;
+    return chrome.storage.local.get({ approvals: [], reviews: [] });
+  }
+  if (message.type === "SYNC_APPROVALS" || message.type === "REVOKE_APPROVAL") {
+    // Only extension pages can initiate wallet operations; page bridges cannot.
+    if (sender.tab || sender.id !== chrome.runtime.id)
+      throw new Error("Use the extension popup.");
+    const [tab] = await chrome.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    if (!tab?.id)
+      throw new Error("Open the dApp tab with your connected wallet.");
+    const state = await chrome.storage.local.get({ approvals: [] });
+    if (message.type === "SYNC_APPROVALS") {
+      if (!state.approvals.length) return { approvals: [] };
+      const updates = await chrome.tabs.sendMessage(tab.id, {
+        type: "CHECK_APPROVALS",
+        approvals: state.approvals,
+      });
+      if (!Array.isArray(updates))
+        throw new Error(
+          updates?.error ||
+            "Could not check approvals. Open the connected dApp and reload the extension.",
+        );
+      await writeState((current) => ({
+        approvals: current.approvals.map((row) => {
+          const update = updates?.find((item) => item.key === approvalKey(row));
+          return update && row.hash === update.hash
+            ? { ...row, state: update.state }
+            : row;
+        }),
+      }));
+      return chrome.storage.local.get({ approvals: [] });
+    }
+    const row = state.approvals.find(
+      (item) => approvalKey(item) === message.key,
+    );
+    if (!row || row.state !== "confirmed")
+      throw new Error("Refresh and confirm the approval first.");
+    const result = await chrome.tabs.sendMessage(tab.id, {
+      type: "REVOKE_APPROVAL",
+      approval: row,
+    });
+    if (result.error) throw new Error(result.error);
+    if (!HASH.test(result.hash || ""))
+      throw new Error("The wallet did not return a transaction hash.");
+    await writeState((current) => ({
+      approvals: current.approvals.map((item) =>
+        approvalKey(item) === message.key
+          ? {
+              ...item,
+              hash: result.hash,
+              state: "revocation submitted",
+              is_revocation: true,
             }
-        } catch (fetchError) {
-            console.log('Backend not available, using mock mode');
-        }
-        
-        const isPhishing = url.includes('malicious');
-        
-        if (isPhishing) {
-            chrome.scripting.executeScript({
-                target: { tabId: tabId },
-                func: showWarningOverlay
-            });
-        }
-    } catch (err) {
-        console.error("Analysis failed:", err);
-    }
+          : item,
+      ),
+    }));
+    return result;
+  }
+  throw new Error("Unsupported extension request.");
 }
 
-function showWarningOverlay() {
-    const overlay = document.createElement('div');
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 0, 0, 0.9);
-        color: white;
-        z-index: 999999;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        font-family: sans-serif;
-    `;
-    overlay.innerHTML = `
-        <h1>⚠️ Phishing Warning ⚠️</h1>
-        <p>This site has been identified as a potential phishing attack by Crypto-C.</p>
-        <button id="crypto-c-dismiss" style="margin-top: 20px; padding: 10px 20px; font-size: 16px;">I understand the risk</button>
-    `;
-    document.body.appendChild(overlay);
-    
-    document.getElementById('crypto-c-dismiss').onclick = () => {
-        overlay.remove();
-    };
-}
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === 'TRANSACTION_INTERCEPTED') {
-        handleTransaction(message.payload).then(sendResponse);
-        return true;
-    }
+chrome.runtime.onMessage.addListener((message, sender, respond) => {
+  handle(message, sender)
+    .then((value) => respond({ ok: true, value }))
+    .catch((error) => respond({ ok: false, error: error.message }));
+  return true;
 });
-
-async function handleTransaction(payload) {
-    console.log("Transaction intercepted:", payload);
-    
-    try {
-        const response = await fetch('http://localhost:8000/api/simulate', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ 
-                transaction: payload.params || payload,
-                chain_id: 1
-            })
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            return {
-                status: result.status,
-                riskScore: result.risk_score,
-                summary: result.summary
-            };
-        }
-    } catch (fetchError) {
-        console.log('Backend not available, using mock mode');
-    }
-    
-    return {
-        status: "risk",
-        riskScore: 85,
-        summary: "You are approving a transfer of ALL your USDT to an unknown address."
-    };
-}
-
